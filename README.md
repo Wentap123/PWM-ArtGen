@@ -30,7 +30,7 @@ The method couples action diffusion and image diffusion with independent diffusi
 
 ## Release Plan
 
-We will release the training/inference code and model checkpoints before **September 8, 2026**.
+We will release the training/inference code and model checkpoints before **September 30, 2026**.
 
 ## Citation
 
