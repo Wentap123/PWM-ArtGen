@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+outputs/
+data/
+checkpoints/
+wandb/
+swanlog/
+*.pt
+*.pth
+*.safetensors
+*.log
+
+# Release staging and downloaded assets
+release-staging/
+dist/
+downloads/
+.venv-hf/
+*.zip
