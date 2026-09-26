@@ -1,85 +1,59 @@
 # Environment setup
 
-Use separate environments for PWM and retrieval/evaluation. The single root
-`requirements.txt` lists core pins and commented optional dependencies.
-Comments document optional stacks; `pip install -r requirements.txt` installs
-only PWM core dependencies. Commands below run from the repository root.
-
-## PWM
+Use one `pwm` environment for training, inference, mesh retrieval, and evaluation.
+Run the following commands from the repository root:
 
 ```bash
 conda create -n pwm python=3.10 -y
 conda activate pwm
+python -m pip install torch==2.2.2 torchvision==0.17.2 \
+  --index-url https://download.pytorch.org/whl/cu118
 python -m pip install -r requirements.txt
-export PYTHON_BIN="$(command -v python)"
 ```
 
-The reference environment used Python 3.10.18 and PyTorch 2.2.2+cu121.
-Use a compatible CUDA driver. Supply the SDXL VAE through `--vae_path` and
-`checkpoints/pwm_final.pt` through `--ckpt`. DINOv2 loads
-`dinov2_vitb14_reg` from `facebookresearch/dinov2` via torch.hub; first use
-requires access to the repository and its pretrained weights, or a populated
-Torch Hub cache. The reference weight is `dinov2_vitb14_reg4_pretrain.pth`.
+`requirements.txt` includes retrieval dependencies and the Hugging Face CLI.
+All launchers use the active environment's Python by default. NetworkX is pinned
+to 3.4.2 so conversion and retrieval produce matching topology hashes.
 
-## Retrieval and evaluation (optional for inference)
+## Evaluation
+
+Install PyTorch3D in the same environment after PyTorch:
 
 ```bash
-conda create -n pwm-retrieval python=3.10 -y
-conda activate pwm-retrieval
-python -m pip install numpy==2.2.6 scipy==1.15.3 networkx==3.4.2 \
-  numpy-quaternion==2024.0.12 trimesh==4.8.3
-python -m pip install torch==2.3.1 torchvision==0.18.1 \
-  --index-url https://download.pytorch.org/whl/cu118
-# Build PyTorch3D against this environment's CUDA/PyTorch stack:
+conda activate pwm
 python -m pip install ninja iopath
 python -m pip install --no-build-isolation \
   'git+https://github.com/facebookresearch/pytorch3d.git@V0.7.8'
-export RETRIEVAL_PYTHON="$(command -v python)"
 ```
 
-Building PyTorch3D requires a compatible compiler and CUDA toolkit. Consult
-[upstream installation instructions](https://github.com/facebookresearch/pytorch3d/blob/V0.7.8/INSTALL.md)
-for platform requirements. These pins record the reference evaluation stack;
-a fresh installation on every hardware/platform combination has not been tested.
-NetworkX must remain **3.4.2** for matching topology hashes. Do not install the
-root core requirements into this environment.
+PyTorch3D 0.7.8 supports PyTorch 2.2.2. A CUDA build requires a compiler and
+CUDA toolkit matching the PyTorch installation (CUDA 11.8 for the commands
+above). Set `CUDA_HOME` to your toolkit directory if it is not detected.
+See the [official build instructions](https://github.com/facebookresearch/pytorch3d/blob/V0.7.8/INSTALL.md).
+PyTorch3D is only needed for metric computation.
 
-## Photo preprocessing and logging (optional)
+## Segmentation
 
-Follow upstream [SAM3](https://github.com/facebookresearch/sam3#installation)
-or [SAM](https://github.com/facebookresearch/segment-anything#installation)
-setup in its own environment, then install the photo utilities listed in the
-optional block:
+For single-image preprocessing, follow the official installation and checkpoint
+instructions for [SAM3](https://github.com/facebookresearch/sam3#installation)
+or [SAM](https://github.com/facebookresearch/segment-anything#installation).
+Set `SAM3_PYTHON` or `SAM_PYTHON` if segmentation uses a different environment.
+See the [single-image guide](single_image.md) for RMBG and graph prediction.
+PM/ACD test-set inference uses the provided masks and graphs.
+
+## Model downloads
+
+Use `hf download` from the active `pwm` environment. See the README for the
+PWM-ArtGen checkpoint, test inputs, and SDXL VAE download commands.
+DINOv2 loads `dinov2_vitb14_reg` from `facebookresearch/dinov2` via Torch Hub;
+the first run downloads its code and weights unless already cached.
+
+## Optional logging
 
 ```bash
-python -m pip install numpy Pillow opencv-python openai transformers timm kornia einops
+conda activate pwm
+python -m pip install swanlab==0.6.8 wandb==0.19.1
 ```
 
-Set `SAM3_PYTHON` or `SAM_PYTHON` to that interpreter. Upstream segmentation
-Python/CUDA requirements take precedence over the PWM environment. See
-[single-image instructions](single_image.md) for checkpoints, RMBG and API use.
-Benchmark inference uses prepared graphs/masks and needs no segmentation or API.
-
-For training logging, in the PWM environment:
-
-```bash
-"$PYTHON_BIN" -m pip install swanlab==0.6.8 wandb==0.19.1
-```
-
-Logging is disabled by default; add `--use_wandb` to enable it. SwanLab is
-preferred when installed.
-
-## Hugging Face utility CLI
-
-Install the CLI separately to avoid changing the model environment's pinned
-Transformers dependencies:
-
-```bash
-python3 -m venv .venv-hf
-.venv-hf/bin/python -m pip install -U huggingface_hub
-export PATH="$PWD/.venv-hf/bin:$PATH"
-hf --help
-```
-
-See the [official CLI guide](https://huggingface.co/docs/huggingface_hub/guides/cli).
-`hf auth login` is needed for uploads or restricted resources, not public downloads.
+Add `--use_wandb` to the training command to enable logging. SwanLab is used
+when installed; otherwise the logger uses W&B.

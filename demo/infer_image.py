@@ -1,4 +1,4 @@
-"""Single image to articulated meshes, with separately configured Python environments."""
+"""Single image to articulated meshes, with an optional segmentation interpreter."""
 import argparse
 import hashlib
 import json
@@ -110,7 +110,7 @@ def run(args):
     def has_outputs(name):
         if name == 'preprocess':
             return ((output / 'preprocess/prepared.json').is_file()
-                    and any((output / 'preprocess/data').glob('test/*/input/waiting_use/view_id_00/joint_*/mask_renum_bbox.json')))
+                    and any((output / 'preprocess/data').glob('test/*/input/view_id_00/joint_*/mask_renum_bbox.json')))
         if name == 'inference':
             return any((output / 'predictions/input').glob('joint_*/geom_pred.json'))
         return any((output / 'retrieval').glob('0@*@input/0/object_pwm.json'))

@@ -61,7 +61,7 @@ def prepare_job(object_dir, args):
     view = args.view_id
     if view is not None and view.isdecimal():
         view = f"view_id_{int(view):02d}"
-    views = sorted((source / "waiting_use").glob(view or "view_id_*"))
+    views = sorted(source.glob(view or "view_id_*"))
     views = [path for path in views if (path / "process/graph_renum.json").is_file()]
     if len(views) != 1:
         raise ValueError(f"Expected one graph view for {object_dir.name}, found {len(views)}; specify --view_id.")

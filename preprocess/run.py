@@ -24,7 +24,7 @@ def write_json(path, data):
 def export_inputs(graph, labels, rgba, root, backend, category):
     from .soft_mask import make_soft_mask
     root = Path(root)
-    view = root / 'data/test' / category / 'input/waiting_use/view_id_00'
+    view = root / 'data/test' / category / 'input/view_id_00'
     graph.setdefault('meta', {})['obj_cat'] = category
     write_json(view / 'process/graph_renum.json', graph)
     Image.fromarray(labels.astype(np.int32)).save(view / 'process/mask.png')

@@ -10,14 +10,12 @@ Frontal views with a clearly visible object generally work best.
 First follow the official environment and checkpoint setup for
 [SAM3](https://github.com/facebookresearch/sam3#installation) or
 [SAM](https://github.com/facebookresearch/segment-anything#installation), then
-install the optional photo preprocessing dependencies in `requirements.txt` in that environment. Keep it separate from
-PWM and Singapo. See [preprocessing setup and attribution](../preprocess/NOTICE.md)
+install the optional photo preprocessing dependencies in `requirements.txt` in the selected segmentation environment. See [preprocessing setup and attribution](../preprocess/NOTICE.md)
 for RMBG background removal and model requirements.
 
 ```bash
-export PYTHON_BIN=/path/to/pwm-env/bin/python
+conda activate pwm
 export SAM3_PYTHON=/path/to/sam3-env/bin/python
-export RETRIEVAL_PYTHON=/path/to/retrieval-env/bin/python
 export OPENAI_API_KEY=your_api_key
 
 bash demo/infer_image.sh --image /path/to/photo.png --out_dir /path/to/result \
@@ -36,6 +34,11 @@ Use `OPENAI_BASE_URL` only for an explicitly chosen compatible endpoint;
 `--graph_json` and (SAM only) `--assignments_json` accept cached responses.
 
 Results are grouped into `preprocess/`, `predictions/`, and `retrieval/`.
+The pipeline writes prepared inputs directly under
+`preprocess/data/test/<category>/input/view_id_00/`, with `joint_<id>/`
+observations and a `process/` directory for the graph and mask. These files are
+generated automatically; users only supply the photo and model paths.
+
 Postprocessing is enabled unless `--no-postprocess` is supplied. Use a fresh
 output directory for a different image or configuration. Completed stages and
 API responses are cached; continue with `bash demo/infer_image.sh --out_dir /path/to/result`
@@ -51,10 +54,10 @@ ambiguous. Handles are part of their parent masks, not separate nodes.
 ## Mesh retrieval
 
 First download the [Singapo preprocessed PartNet-Mobility data](https://github.com/3dlg-hcvc/singapo#download-data)
-used for part retrieval, then convert its object annotations in the retrieval environment:
+used for part retrieval, then convert its object annotations in the `pwm` environment:
 
 ```bash
-"$RETRIEVAL_PYTHON" scripts/prepare_database.py \
+python scripts/prepare_database.py \
   --database_root /path/to/mesh_database
 ```
 
@@ -64,7 +67,7 @@ Original annotations and meshes are preserved. Handles are merged into parent
 mesh references; prismatic parts named `handle` are retained as drawers.
 Hashes are recomputed **after** conversion; the original Singapo index is used
 only as a candidate allowlist. Conversion and retrieval require `networkx==3.4.2`
-from the optional retrieval dependencies in `requirements.txt` to keep hashes compatible.
+from `requirements.txt` to keep hashes compatible.
 
 Use `--dry-run` to inspect the conversion, `--overwrite` to replace different
 generated annotations/indexes, and `--reference_hashbook /path/to/index.json`
@@ -73,7 +76,7 @@ are skipped. Invalid objects are reported and excluded; any failure or an empty
 candidate index returns a nonzero exit status. The conversion report is refreshed
 on each non-dry run. Only the seven PWM categories are processed.
 
-Run retrieval after inference in the separate retrieval environment:
+Run retrieval after inference in the same `pwm` environment:
 
 ```bash
 bash scripts/retrieve.sh \
@@ -102,8 +105,8 @@ to override it. Without a database index, the bundled legacy PWM index remains
 available for existing prepared databases. Object ranking and missing-part
 search both stay within the selected index's candidates.
 
-Retrieval dependencies are listed in the optional retrieval dependencies in `requirements.txt`; evaluation
-also needs the Singapo environment's CUDA-enabled PyTorch and PyTorch3D.
+Retrieval dependencies are included in `requirements.txt`. Evaluation also
+requires PyTorch3D in the same `pwm` environment; see [setup](setup.md).
 
 Mesh retrieval is adapted from [Singapo](https://github.com/3dlg-hcvc/singapo).
 In our representation, handles are merged into their parent parts and are not

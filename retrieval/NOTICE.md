@@ -21,4 +21,4 @@ catalog from the local `retrieval_hash_no_handles.json`, corresponding to
 Only category/object membership is used; its original hash keys are not reused.
 The resulting PWM index includes only successfully converted candidates whose
 mesh references exist. Conversion and query hashing share the same implementation
-and use NetworkX 3.4.2 as pinned in the optional retrieval section of `../requirements.txt`.
+and use NetworkX 3.4.2 as pinned in the retrieval section of `../requirements.txt`.

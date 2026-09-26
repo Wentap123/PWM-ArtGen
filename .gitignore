@@ -18,3 +18,6 @@ dist/
 downloads/
 .venv-hf/
 *.zip
+
+# Local regression tests
+/tests/

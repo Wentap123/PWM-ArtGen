@@ -10,7 +10,7 @@ assets have been uploaded and verified; GitHub has not been pushed by this task.
 
 GitHub: root README, requirements, train/infer/evaluate entrypoints; `models/`,
 `datasets/`, `preprocess/`, `retrieval/` (including assets and licenses),
-`evaluation/`, `splits/`, `scripts/`, `demo/`, `docs/`, `tests/`, and `.gitignore`.
+`evaluation/`, `splits/`, `scripts/`, `demo/`, `docs/`, and `.gitignore`.
 Exclude checkpoints, raw/prepared datasets, predictions, caches, API secrets,
 local environment directories and release staging. Review `git status` and the
 staged file list before committing; `.gitignore` does not untrack existing files.
@@ -75,13 +75,10 @@ counts (77/134), view counts (154/268), and complete dataset metadata.
 
 ## Validate and publish
 
-```bash
-"$PYTHON_BIN" -m unittest discover -s tests -v
-"$RETRIEVAL_PYTHON" -m unittest discover -s tests -p test_database.py -v
-"$RETRIEVAL_PYTHON" -m unittest discover -s tests -p test_acd_conversion.py -v
-```
+Run the local maintainer regression suite before preparing a release.
+The `tests/` directory is kept locally and excluded from the public repository.
 
-These tests use temporary fixtures; they do not establish full benchmark
+The local regression tests use temporary fixtures; they do not establish full benchmark
 reproducibility or a clean installation. In a separate fresh checkout and output
 directory, follow README downloads/conversion/inference/evaluation end to end
 before declaring a public release reproduced. Record code revision, environment

@@ -1,13 +1,13 @@
 """
-Inference-only PartNet dataset — strict waiting_use layout, no 'next' returned.
+Inference-only PartNet dataset — object/view/joint layout, no 'next' returned.
 
 Path pattern assumed:
   masked images:
-    <root>/<split>/<cat>/<obj>/waiting_use/view_id_XX/joint_YY/frame_000_view_ZZ_masked.png
+    <root>/<split>/<cat>/<obj>/view_id_XX/joint_YY/frame_000_view_ZZ_masked.png
   rgb images:
-    <root>/<split>/<cat>/<obj>/waiting_use/view_id_XX/joint_YY/frame_000_view_ZZ.png
+    <root>/<split>/<cat>/<obj>/view_id_XX/joint_YY/frame_000_view_ZZ.png
   bbox json (optional):
-    <root>/<split>/<cat>/<obj>/waiting_use/view_id_XX/joint_YY/mask_renum_bbox.json
+    <root>/<split>/<cat>/<obj>/view_id_XX/joint_YY/mask_renum_bbox.json
 
 Notes:
 - This dataset NEVER reads or returns "next".
@@ -59,7 +59,7 @@ def _read_img_uint8(path: str, size: Tuple[int, int]) -> np.ndarray:
 
 class PartNetMobilityInferenceDataset(Dataset):
     """
-    Inference-only dataset for strict waiting_use layout, never returns 'next'.
+    Inference-only dataset for object/view/joint layout, never returns 'next'.
     """
     def __init__(
         self,
@@ -102,14 +102,10 @@ class PartNetMobilityInferenceDataset(Dataset):
                 obj_dir = os.path.join(cat_dir, obj_name)
                 if not os.path.isdir(obj_dir):
                     continue
-                waiting_dir = os.path.join(obj_dir, "waiting_use")
-                if not os.path.isdir(waiting_dir):
-                    continue
-
                 joints_map: Dict[str, Dict[str, Any]] = {}
 
-                for view_d in sorted(os.listdir(waiting_dir), key=_natural_sort_key):
-                    view_d_full = os.path.join(waiting_dir, view_d)
+                for view_d in sorted(os.listdir(obj_dir), key=_natural_sort_key):
+                    view_d_full = os.path.join(obj_dir, view_d)
                     if not os.path.isdir(view_d_full):
                         continue
                     mview = _VIEW_DIR_RE.match(view_d)

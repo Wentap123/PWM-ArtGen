@@ -71,7 +71,7 @@ Portable-dataset predictions use `<object_key>/view_0|view_1/joint_<id>/`.
 Legacy PM predictions use `<id>/joint_<id>/view_idx_XX/`, and legacy ACD uses
 `<source>/<id>/joint_<id>/`. The following entrypoint assembles those
 predictions, applies postprocessing, retrieves meshes, and computes Singapo
-AS/RS IoU, center distance, Chamfer distance, and AOR in the Singapo environment:
+AS/RS IoU, center distance, Chamfer distance, and AOR in the `pwm` environment:
 
 The retained Singapo keys `AS-IoU` and `RS-IoU` contain **1 − GIoU errors**, not
 ordinary IoUs (the local implementation calls `sampling_giou`). Lower is better
@@ -79,7 +79,6 @@ for all reported metrics; undefined AOR is excluded
 from its mean.
 
 ```bash
-export RETRIEVAL_PYTHON=/path/to/retrieval-env/bin/python
 bash scripts/evaluate.sh --dataset pm --data_root data/benchmarks/pm \
   --gt_root data/raw/pm --database_root data/raw/pm --hashbook data/raw/pm/pwm_hash_filtered.json \
   --pred_root outputs/pm/predictions --out_dir outputs/pm/evaluation
@@ -106,7 +105,7 @@ After both benchmarks finish, audit coverage and save an overall/per-view
 summary including the checkpoint SHA-256:
 
 ```bash
-"$RETRIEVAL_PYTHON" scripts/summarize_results.py --out_root outputs --datasets_root data/benchmarks \
+python scripts/summarize_results.py --out_root outputs --datasets_root data/benchmarks \
   --ckpt checkpoints/pwm_final.pt --hashbook data/raw/pm/pwm_hash_filtered.json
 ```
 

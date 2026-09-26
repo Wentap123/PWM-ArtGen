@@ -2,4 +2,4 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-exec "${RETRIEVAL_PYTHON:-python}" "$PROJECT_ROOT/evaluate.py" "$@"
+exec "${RETRIEVAL_PYTHON:-${PYTHON_BIN:-python}}" "$PROJECT_ROOT/evaluate.py" "$@"

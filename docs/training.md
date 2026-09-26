@@ -16,20 +16,12 @@ data_root/{train,test}/<category>/<object_id>/
 
 Both original and edited images are used for training. Keep their corresponding masks and metadata. The final recipe uses frames 0 and 2, with the `test` split used for validation.
 
-Inference expects prepared RGB and masked observations:
+Data rendering and training-image editing are not included.
 
-```text
-data_root/test/<category>/<object_id>/waiting_use/
-  view_id_XX/joint_<id>/
-    frame_000_view_XX.png
-    frame_000_view_XX_masked.png
-    mask_renum_bbox.json
-```
-
-The bbox file contains `base_bbox_cxcywh_norm` and `joint_bbox_cxcywh_norm`.
-Data rendering and training-image editing are not included. For an ordinary
-input photo, use the single-image pipeline below; no dataset layout is required.
-
+For inference, download the prepared PM/ACD test archives from
+[Hugging Face](https://huggingface.co/datasets/Wentap/PWM-ArtGen-test) and follow
+[the inference commands](../README.md#inference). For an ordinary input photo,
+follow the [single-image guide](single_image.md).
 
 ## Training recipe
 

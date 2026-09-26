@@ -43,11 +43,11 @@ Reference archive SHA-256 values:
 ## Convert annotations and rebuild the PM index
 
 ```bash
-"$RETRIEVAL_PYTHON" scripts/prepare_database.py --database_root data/raw/pm --dry-run
-"$RETRIEVAL_PYTHON" scripts/prepare_database.py --database_root data/raw/pm
-"$RETRIEVAL_PYTHON" scripts/convert_acd_pwm.py --gt_root data/raw/acd \
+python scripts/prepare_database.py --database_root data/raw/pm --dry-run
+python scripts/prepare_database.py --database_root data/raw/pm
+python scripts/convert_acd_pwm.py --gt_root data/raw/acd \
   --test_ids data/benchmarks/acd/test_ids.json --dry-run
-"$RETRIEVAL_PYTHON" scripts/convert_acd_pwm.py --gt_root data/raw/acd \
+python scripts/convert_acd_pwm.py --gt_root data/raw/acd \
   --test_ids data/benchmarks/acd/test_ids.json
 ```
 

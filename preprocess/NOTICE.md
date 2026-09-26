@@ -19,8 +19,7 @@ and checkpoint instructions for the backend you select:
 
 Install the optional photo dependencies from [requirements.txt](../requirements.txt)
 (see [setup](../docs/setup.md)) in the selected backend environment after
-following its upstream setup. Do not combine the SAM3, PWM, and Singapo dependency
-sets. Model weights are not redistributed here; their upstream terms apply.
+following its upstream setup. Follow the selected segmentation backend's Python and PyTorch requirements. Model weights are not redistributed here; their upstream terms apply.
 
 The SAM3 adapter follows the local PWM text-prompt experiment: graph-derived
 door/drawer prompts, confidence fallback, then a base-rooted instance graph.
