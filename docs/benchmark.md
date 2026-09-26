@@ -12,14 +12,9 @@ bash scripts/infer_pm.sh --data_root data/benchmarks/pm --vae_path /path/to/sdxl
 bash scripts/infer_acd.sh --data_root data/benchmarks/acd --vae_path /path/to/sdxl_vae
 ```
 
-The public inference subset uses **two views per object**, evaluated separately:
-PM source views `view_idx_00/01` become `view_0/1`; ACD source view `10` becomes
-`view_0`, with the most frontal-like complete remaining view selected as `view_1`.
-Selection maximizes 0.25 × silhouette IoU + 0.75 × mean part-mask IoU against
-view 10 after centering and aspect-preserving scale normalization. This is a
-2D frontal-similarity proxy, not a measured camera angle; it never uses model
-predictions or evaluation scores. Each object's `views.json` records the scores and
-original mapping. `--view_ids 0` selects only the first view.
+The public inference subset uses **two views per object**, evaluated separately.
+They are stored as `view_0` and `view_1`; `views.json` contains the sample records
+needed for loading. `--view_ids 0` selects only the first view.
 
 Both datasets have the same portable layout:
 
@@ -56,8 +51,7 @@ The Singapo mesh database is **not** the PM rendered input directory. Legacy ACD
 where source is `abo-data` or `hssd-data`. Legacy `object_uwm.json` is accepted.
 
 Fixed manifests are bundled in `splits/pm_test.json` (77 objects from the local
-rendered test split) and `splits/acd_test.json` (134 objects with prepared view-10
-files). These are path-based manifests, not a claim that all annotations have
+rendered test split) and `splits/acd_test.json` (135 objects in the prepared two-view dataset). These are path-based manifests, not a claim that all annotations have
 been validated. Missing/unusable selected objects raise errors. Override with
 `--test_ids /path/to/ids.json`; `--num_samples 1` is useful for a smoke test.
 To prepare a manifest for another dataset copy without loading images:

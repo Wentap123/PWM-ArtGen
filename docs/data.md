@@ -11,7 +11,7 @@ the rendered/masked inputs used by PWM inference.
 | Prepared PM/ACD observations | [Wentap/PWM-ArtGen-test](https://huggingface.co/datasets/Wentap/PWM-ArtGen-test) | Two-view inference inputs |
 
 Follow original providers' terms and attribution. Prepared archives contain
-observations, masks, bboxes, GT part graphs, view mappings and test manifests;
+observations, masks, bboxes, GT part graphs, sample records and test manifests;
 they do not contain GT meshes, motion target frames, or the retrieval library.
 End users download these prepared inputs rather than rerendering or reexporting.
 
@@ -87,12 +87,9 @@ pm/ or acd/
 ```
 
 PM keys are `<category>/<id>`; ACD keys are `<source>/<category>/<id>`.
-PM source views 00/01 map to views 0/1. ACD source view 10 maps to view 0;
-view 1 is the highest-scoring other complete view using 0.25 silhouette IoU +
-0.75 mean part-mask IoU after centering and aspect-preserving scaling.
-`views.json` records the mapping and scores. This is a 2D frontal similarity
-measure and does not use predictions or evaluation metrics.
+Each object has two inputs, `view_0` and `view_1`. `views.json` contains
+the image paths, part labels, and bounding boxes used by the inference loader.
 
-The fixed split contains 77 PM and 134 ACD objects.
+The fixed split contains 77 PM and 135 ACD objects.
 See [benchmark details](benchmark.md) for legacy layouts and maintainer export
 commands, and [release preparation](release.md) before publishing archives.

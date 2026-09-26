@@ -50,7 +50,7 @@ or [SAM3](https://github.com/facebookresearch/sam3#installation) instructions.
 ### PM and ACD test inputs
 
 Download the prepared test sets from [Hugging Face](https://huggingface.co/datasets/Wentap/PWM-ArtGen-test).
-They contain 77 PM and 134 ACD objects, with two views per object, images, masks,
+They contain 77 PM and 135 ACD objects, with two views per object, images, masks,
 bounding boxes, and part graphs. The `hf` CLI is included in the environment.
 
 ```bash

@@ -1,7 +1,6 @@
 {
   "dataset": "acd",
   "split": "test",
-  "selection": "ACD objects with prepared view 10 inputs",
   "object_ids": [
     "abo-data/armoire/B07GFDZVYY",
     "abo-data/armoire/B07GFSJ69T",
@@ -118,6 +117,7 @@
     "hssd-data/sink_cabinet/027f20642dd34e7914fc4fc4efa70fbb54bcecbb",
     "hssd-data/sink_cabinet/112dc87e26450400941c6eaff60866bc19badc64",
     "hssd-data/sink_cabinet/56dc6fc7669736b5fd6a85d1b14a01d029beff59",
+    "hssd-data/sink_cabinet/5f074f91cc2ce2a4d5a62e6cce77c435e5dbf457",
     "hssd-data/sink_cabinet/6219ef05f4a7b56419749e45a45143df8af44495",
     "hssd-data/sink_cabinet/76102a94ca13d9cdaf7d5a77262cddd4df9a806c",
     "hssd-data/sink_cabinet/829bf87b541238bb7579a05d18d4f7f1d1f98af1",

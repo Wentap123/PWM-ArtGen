@@ -6,41 +6,62 @@ tags:
 - articulated-objects
 - benchmark
 ---
-# PWM-ArtGen Benchmarks
+# PWM-ArtGen-test
 
-Code: https://github.com/Wentap123/PWM-ArtGen.
-Dataset repository: `Wentap/PWM-ArtGen-test`.
+Test inputs for [PWM-ArtGen: Part World Model for Articulated Object Generation](https://github.com/Wentap123/PWM-ArtGen).
+Model weights: [Wentap/PWM-ArtGen](https://huggingface.co/Wentap/PWM-ArtGen).
 
-`pwm_pm_test.zip` extracts to `pm/` (77 objects, 154 object-views).
-`pwm_acd_test.zip` extracts to `acd/` (134 objects, 268 object-views).
-Archives contain observation RGB, masks, bboxes, GT part graphs, view mappings,
-test IDs and member checksums. They exclude meshes, motion target frames and the
-retrieval library. This benchmark supplies GT structure; it is distinct from
-single-photo inference with automatically predicted masks and graphs.
+| Archive | Extracted directory | Objects | Views |
+| --- | --- | --- | --- |
+| `pwm_pm_test.zip` | `pm/` | 77 | 154 |
+| `pwm_acd_test.zip` | `acd/` | 135 | 270 |
 
-PM views 00/01 map to views 0/1. ACD view 10 maps to view 0; view 1 maximizes
-0.25 silhouette IoU + 0.75 mean part-mask IoU over other complete views, after
-centering and aspect-preserving scaling. See `views.json` for each source mapping.
-
-
-Sources: [PartNet-Mobility](https://sapien.ucsd.edu/browse),
-[ACD/S2O](https://huggingface.co/datasets/3dlg-hcvc/s2o), and
-[Singapo](https://github.com/3dlg-hcvc/singapo). Download original mesh packages
-separately: [PM](https://aspis.cmpt.sfu.ca/projects/singapo/data/pm.zip),
-[ACD](https://aspis.cmpt.sfu.ca/projects/singapo/data/acd_test.zip).
-Prepared PWM observations are not interchangeable with those mesh packages.
-
-Both test sets retrieve from converted PM. PM GT is converted PM; ACD GT is
-converted ACD. The reference PM library includes 75 PM test IDs, so it is not a
-held-out retrieval-library protocol. Follow repository documentation to rebuild
-`object_pwm.json` and the PM index, run inference, and evaluate.
-
-Original dataset terms apply; no additional license grant is implied.
-Project citation details have not yet been specified. Check `SHA256SUMS` for archive
-integrity and retain member checksums when extracting.
+Each object has two inputs, `view_0` and `view_1`, with RGB images, part masks,
+bounding boxes, and a GT part graph. `views.json` contains the sample records
+used by the inference loader. Each archive includes `test_ids.json`,
+`dataset.json`, and per-file checksums in `checksums.json`.
+Meshes and the retrieval library are downloaded separately.
 
 ## Download
 
 ```bash
-hf download Wentap/PWM-ArtGen-test pwm_pm_test.zip pwm_acd_test.zip SHA256SUMS --repo-type dataset --local-dir downloads
+hf download Wentap/PWM-ArtGen-test pwm_pm_test.zip pwm_acd_test.zip SHA256SUMS \
+  --repo-type dataset --local-dir downloads
+(cd downloads && sha256sum -c SHA256SUMS)
+mkdir -p data/benchmarks
+unzip downloads/pwm_pm_test.zip -d data/benchmarks
+unzip downloads/pwm_acd_test.zip -d data/benchmarks
+```
+
+Use the extracted directories with the inference and evaluation commands in the
+[code repository](https://github.com/Wentap123/PWM-ArtGen). The inference loader
+reads each dataset's included `test_ids.json`.
+
+## Data sources
+
+The original datasets are [PartNet-Mobility](https://sapien.ucsd.edu/browse) and
+[ACD/S2O](https://huggingface.co/datasets/3dlg-hcvc/s2o).
+The annotation and mesh packages used for retrieval and evaluation are provided by
+[SINGAPO](https://github.com/3dlg-hcvc/singapo):
+[PM package](https://aspis.cmpt.sfu.ca/projects/singapo/data/pm.zip) and
+[ACD test package](https://aspis.cmpt.sfu.ca/projects/singapo/data/acd_test.zip).
+These mesh packages are separate from the prepared image inputs in this repository.
+Original dataset terms apply.
+
+Both test sets retrieve from the processed PM library. Evaluation uses PM ground
+truth for PM and ACD ground truth for ACD. These test inputs provide GT part
+structure; single-image inference uses its own segmentation and graph preparation.
+The reference PM retrieval library includes 75 PM test objects.
+
+## Citation
+
+```bibtex
+@inproceedings{zheng2026pwm,
+  title={PWM-ArtGen: Part World Model for Articulated Object Generation},
+  author={Zheng, Wentao and Wu, Ancong},
+  booktitle={European Conference on Computer Vision},
+  pages={251--267},
+  year={2026},
+  organization={Springer}
+}
 ```

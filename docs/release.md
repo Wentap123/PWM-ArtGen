@@ -4,7 +4,7 @@ The intended GitHub repository is https://github.com/Wentap123/PWM-ArtGen.
 Confirm the project license, authors/paper/citation, and release metadata
 before publishing. Preserve third-party license files and NOTICE documents.
 The commands below describe asset preparation and updates. The initial HF
-assets have been uploaded and verified; GitHub has not been pushed by this task.
+assets and code have been published.
 
 ## Files to publish
 
@@ -42,27 +42,12 @@ release. The reference file is 3,559,406,910 bytes, SHA-256:
 c9be8ab16b3eb1f978bd1b95a95f1f2292af575848684a0473c23af854a1ef5b
 ```
 
-Sanitize only staged dataset metadata. Remove machine-local `source_root`;
-replace the dataset-level `selection` description with the actual protocol.
-Do not change images, masks, graphs, test IDs, or per-object `views.json`.
-Existing member checksums remain unchanged; regenerate archive checksums after
-packaging. Inspect other metadata for machine-specific paths before release.
+Stage inputs exported by the current `scripts/export_test_data.py`, or use the
+published HF archives. Metadata contains only the dataset and sample information
+needed for loading, without source paths, source-view mappings, or selection scores.
+Verify member checksums before packaging and regenerate archive checksums.
 
 ```bash
-"$PYTHON_BIN" - <<'PYCODE'
-import json
-from pathlib import Path
-selection = {
-    'pm': 'Source views 00 and 01 map to view_0 and view_1; frame 0 observations.',
-    'acd': 'Source view 10 maps to view_0; the highest-scoring other complete frontal-like view maps to view_1 (0.25 silhouette IoU + 0.75 mean part-mask IoU).',
-}
-for dataset, description in selection.items():
-    path = Path('release-staging/inputs') / dataset / 'dataset.json'
-    data = json.loads(path.read_text())
-    data.pop('source_root', None)
-    data['selection'] = description
-    path.write_text(json.dumps(data, indent=2) + '\n')
-PYCODE
 (cd release-staging/inputs && zip -qr ../dataset/pwm_pm_test.zip pm)
 (cd release-staging/inputs && zip -qr ../dataset/pwm_acd_test.zip acd)
 (cd release-staging/model && sha256sum pwm_final.pt > SHA256SUMS)
@@ -71,7 +56,7 @@ PYCODE
 
 Verify archives extract as `pm/` and `acd/`, preserve all member checksums and
 fixed manifests, and contain no meshes or training target frames. Check object
-counts (77/134), view counts (154/268), and complete dataset metadata.
+counts (77/135), view counts (154/270), and complete dataset metadata.
 
 ## Validate and publish
 
@@ -106,8 +91,8 @@ not the reproducibility criterion.
 
 ## Published HF assets
 
-Uploaded and verified on 2026-09-25. Remote file sizes and LFS SHA-256 values
+Model uploaded on 2026-09-25; dataset updated and verified on 2026-09-26. Remote file sizes and LFS SHA-256 values
 match the staged artifacts.
 
 - Model: [Wentap/PWM-ArtGen](https://huggingface.co/Wentap/PWM-ArtGen/commit/a5412910ff9c1443f0117b1f81f043bc2d250481), revision `a5412910ff9c1443f0117b1f81f043bc2d250481`.
-- Dataset: [Wentap/PWM-ArtGen-test](https://huggingface.co/datasets/Wentap/PWM-ArtGen-test/commit/2927d3d0c2f17566dbf8970c28c4b9de28f1be81), revision `2927d3d0c2f17566dbf8970c28c4b9de28f1be81`.
+- Dataset: [Wentap/PWM-ArtGen-test](https://huggingface.co/datasets/Wentap/PWM-ArtGen-test/commit/f26f05b7c6ae60c7ed158ab5f48e80527096fc63), revision `f26f05b7c6ae60c7ed158ab5f48e80527096fc63`.

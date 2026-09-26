@@ -57,7 +57,7 @@ def plan_object(root, oid, dataset):
                 files[mask] = mask_root / f'view_idx_{v:02d}' / f'frame_000_view_{v:02d}.png'
                 samples.append(dict(joint_id=int(joint.name[6:]), node_id=node['id'],
                                     label_id=label_map[joint.name], rgb=rgb, mask=mask, **bbox(metadata)))
-            views[view] = {'source_view': f'view_idx_{v:02d}', 'source_frame': 0, 'samples': samples}
+            views[view] = {'samples': samples}
     else:
         def view_samples(original, view):
             boxes = read(source / 'info' / f'{original}_bbox.json')['bboxes']
@@ -68,28 +68,57 @@ def plan_object(root, oid, dataset):
             samples = [dict(joint_id=n['id'], node_id=n['id'], label_id=n['seg_id'],
                             rgb=rgb, mask=mask, **bbox(boxes[str(n['seg_id'])])) for n in nodes]
             return samples, {rgb:src_rgb, mask:src_mask}
-        first, first_files = view_samples('10', 'view_0')
-        files.update(first_files)
-        views['view_0'] = {'source_view':'10', 'samples': first}
-        candidates = {}
-        for candidate in sorted((source / 'rgbs').glob('*.png')):
-            if candidate.stem == '10':
-                continue
-            try:
-                samples, selected = view_samples(candidate.stem, 'view_1')
-            except (KeyError, ValueError, OSError):
-                continue
-            candidates[candidate.stem] = (samples, selected)
-        if not candidates:
-            raise ValueError(f'{oid}: no complete second view')
-        from evaluation.frontal import rank_views
-        ranked = rank_views(source, candidates, [n['seg_id'] for n in nodes])
-        score, chosen = ranked[0]
-        samples, selected = candidates[chosen]
-        files.update(selected)
-        views['view_1'] = {'source_view': chosen, 'samples': samples,
-                           'selection': 'frontal-mask-similarity-v1', 'similarity': score,
-                           'candidate_scores': {name: value for value, name in ranked}}
+        try:
+            first, first_files = view_samples('10', 'view_0')
+        except (KeyError, ValueError, OSError):
+            # If the reference is incomplete, prefer views where the least
+            # visible movable part occupies the most pixels.
+            import numpy as np
+            from PIL import Image
+            complete = []
+            for candidate in sorted((source / 'rgbs').glob('*.png')):
+                try:
+                    samples, selected = view_samples(candidate.stem, 'view_0')
+                    with Image.open(selected['view_0/mask.png']) as im:
+                        mask = np.array(im)
+                        resized = np.array(im.resize((256, 256), Image.Resampling.NEAREST))
+                    counts = [int(np.count_nonzero(mask == n['seg_id'])) for n in nodes]
+                    if (mask.ndim != 2 or not counts or min(counts) == 0 or
+                            any(not np.any(resized == n['seg_id']) for n in nodes) or
+                            any(sample[key][i] <= 0 for sample in samples
+                                for key in ('base_bbox_cxcywh_norm', 'joint_bbox_cxcywh_norm')
+                                for i in (2, 3))):
+                        continue
+                    complete.append((min(counts), candidate.stem))
+                except (KeyError, ValueError, OSError):
+                    continue
+            complete.sort(key=lambda item: (-item[0], item[1]))
+            if len(complete) < 2:
+                raise ValueError(f'{oid}: fewer than two complete views')
+            for index, (_, original) in enumerate(complete[:2]):
+                view = f'view_{index}'
+                samples, selected = view_samples(original, view)
+                files.update(selected)
+                views[view] = {'samples': samples}
+        else:
+            files.update(first_files)
+            views['view_0'] = {'samples': first}
+            candidates = {}
+            for candidate in sorted((source / 'rgbs').glob('*.png')):
+                if candidate.stem == '10':
+                    continue
+                try:
+                    samples, selected = view_samples(candidate.stem, 'view_1')
+                except (KeyError, ValueError, OSError):
+                    continue
+                candidates[candidate.stem] = (samples, selected)
+            if not candidates:
+                raise ValueError(f'{oid}: no complete second view')
+            from evaluation.frontal import rank_views
+            _, chosen = rank_views(source, candidates, [n['seg_id'] for n in nodes])[0]
+            samples, selected = candidates[chosen]
+            files.update(selected)
+            views['view_1'] = {'samples': samples}
     if not nodes:
         raise ValueError(f'{oid}: no movable parts')
     for path in files.values():
@@ -136,13 +165,12 @@ def export(args):
             hashes[path.relative_to(output).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
         if (index + 1) % 20 == 0:
             print(f'Copied {index + 1}/{len(plans)} objects', flush=True)
-    (output / 'test_ids.json').write_text(json.dumps(read(ids_path), indent=2) + '\n')
+    (output / 'test_ids.json').write_text(json.dumps({'dataset': args.dataset, 'split': 'test', 'object_ids': sorted(ids)}, indent=2) + '\n')
     (output / 'checksums.json').write_text(json.dumps(hashes, indent=2) + '\n')
     # Written last: loaders reject partially copied datasets.
     (output / 'dataset.json').write_text(json.dumps({
         'format':'pwm-two-view-v1', 'dataset':args.dataset, 'objects':len(ids),
-        'views':['view_0','view_1'], 'source_root':str(root),
-        'selection':'PM: 00,01; ACD: 10 then highest frontal-mask-similarity-v1 among complete other views',
+        'views':['view_0','view_1'],
         'images_bytes':size, 'complete':True}, indent=2) + '\n')
     print(f'Complete: {output}', flush=True)
 
